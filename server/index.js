@@ -10,6 +10,7 @@ const rootDir = path.resolve(__dirname, "..");
 const app = express();
 const port = Number(process.env.PORT || 5173);
 const isProduction = process.env.NODE_ENV === "production";
+const host = process.env.HOST || (isProduction ? "0.0.0.0" : "127.0.0.1");
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "1mb" }));
@@ -34,8 +35,8 @@ if (isProduction) {
 
 try {
   await connectDatabase();
-  app.listen(port, "127.0.0.1", () => {
-    console.log(`Milk Supply Vendor Management System running at http://127.0.0.1:${port}/`);
+  app.listen(port, host, () => {
+    console.log(`Milk Supply Vendor Management System running at http://${host}:${port}/`);
   });
 } catch (error) {
   console.error("Server failed to start:", error);
