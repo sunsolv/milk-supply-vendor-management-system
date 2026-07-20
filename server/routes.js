@@ -740,10 +740,11 @@ router.post("/vendor/register/send-otp", async (req, res) => {
       "OTP sent to your email address",
     );
   } catch (error) {
+    console.error("Registration OTP email failed:", error.code || error.message);
     const message =
       error.code === "EMAIL_CONFIG_MISSING"
         ? error.message
-        : "Unable to send OTP. Please try again.";
+        : "Unable to send OTP email. Please try again.";
     return sendError(res, error.code === "EMAIL_CONFIG_MISSING" ? 503 : 500, message);
   }
 });

@@ -937,8 +937,6 @@ function RegistrationPage({ onBack, onRegistered, notify }) {
     );
   }
 
-  const passwordReady = passwordIsStrongEnough(form.password) && passwordsMatch(form.password, form.confirmPassword);
-
   return (
     <AuthPanel
       title="Vendor Registration"
@@ -1002,8 +1000,8 @@ function RegistrationPage({ onBack, onRegistered, notify }) {
         <ShowPasswordControl checked={showPasswords} onChange={setShowPasswords} />
         <PasswordRequirements password={form.password} confirmPassword={form.confirmPassword} />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Button type="submit" icon={Send} disabled={loading || !passwordReady}>
-            Register and Send OTP
+          <Button type="submit" icon={Send} disabled={loading} aria-busy={loading}>
+            {loading ? "Sending OTP..." : "Register and Send OTP"}
           </Button>
           <Button variant="secondary" icon={ArrowLeft} onClick={onBack}>
             Back
