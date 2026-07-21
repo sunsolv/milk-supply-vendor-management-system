@@ -222,7 +222,7 @@ function reportTitle(reportData) {
   const period = reportPeriodLabel(reportData);
   return reportData?.reportType === "Individual"
     ? `Individual Customer Report - ${period}`
-    : `Consolidated Milk Supply Report - ${period}`;
+    : `Consolidated Milk Mitra Report - ${period}`;
 }
 
 function exportReportPdf(reportData, notify) {
@@ -370,7 +370,7 @@ function buildWhatsAppMessage(reportData, paymentStatus = "Unpaid") {
 
   return `Dear ${reportData.customer?.name || "Customer"},\n\nYour milk and dairy product supply details for ${reportData.monthName} ${reportData.year} are:\n\n${productLines || "No supply entries found for this period."}\n\nTotal Amount Payable: ${formatCurrency(reportData.totalAmount || 0)}\nPayment Status: ${paymentStatus}\n\nKindly make the payment to PhonePe or GPay number ${
     reportData.vendor?.phonePeGPayNumber ? `+91 ${reportData.vendor.phonePeGPayNumber}` : "-"
-  } or UPI ID ${reportData.vendor?.upiId || "-"}.\n\nThank you,\n${reportData.vendor?.shopName || "Milk Supply Vendor"}`;
+  } or UPI ID ${reportData.vendor?.upiId || "-"}.\n\nThank you,\n${reportData.vendor?.shopName || "Milk Mitra Vendor"}`;
 }
 
 function openWhatsAppBill(reportData, paymentStatus, notify) {
@@ -402,7 +402,7 @@ Total Amount Payable: ₹${formatBillNumber(totalAmount)}
 Payment Status: ${bill.paymentLine || "Please update payment details in Vendor Profile"}
 
 Thank you,
-${bill.shopName || "Milk Supply Vendor"}`;
+${bill.shopName || "Milk Mitra Vendor"}`;
 }
 
 function openCustomerBillWhatsApp(bill, notify) {
@@ -639,8 +639,8 @@ function Shell({ children }) {
               <Milk className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">Milk Supply</p>
-              <p className="text-xs font-medium text-brandLight">Vendor Management System</p>
+              <p className="text-sm font-bold text-white">Milk Mitra</p>
+              <p className="text-xs font-medium text-brandLight">A Milk Supply Management System</p>
             </div>
           </div>
           <div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-wide text-brandPrimary sm:flex">
@@ -705,7 +705,7 @@ function LandingPage({ onRegister, onLogin }) {
           Phase 1 application
         </p>
         <h1 className="mt-3 text-4xl font-bold text-slate-950 sm:text-5xl">
-          Milk Supply Vendor Management System
+          Milk Mitra - A Milk Supply Management System
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
           Register your vendor account with email OTP verification, login with your

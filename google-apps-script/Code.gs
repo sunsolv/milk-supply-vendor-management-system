@@ -1,5 +1,5 @@
 function doGet() {
-  return jsonResponse_({ success: true, message: "Milk Supply Vendor Apps Script API is running.", data: { version: "1.0.0" } });
+  return jsonResponse_({ success: true, message: "Milk Mitra Apps Script API is running.", data: { version: "1.0.0" } });
 }
 
 function doPost(event) {

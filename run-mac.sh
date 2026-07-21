@@ -79,7 +79,7 @@ if command -v lsof >/dev/null 2>&1 && lsof -n -P -iTCP:"$APP_PORT" -sTCP:LISTEN 
 fi
 
 echo "Using $($NODE_EXECUTABLE --version) from $NODE_EXECUTABLE"
-echo "Starting Milk Supply Vendor Management System"
+echo "Starting Milk Mitra - A Milk Supply Management System"
 echo "Local URL: http://127.0.0.1:$APP_PORT/"
 echo "Press Ctrl-C to stop safely."
 

@@ -33,10 +33,10 @@ export async function sendRegistrationOtpEmail({ to, vendorName, otp }) {
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to,
-    subject: "Your Milk Vendor Registration OTP",
+    subject: "Your Milk Mitra Registration OTP",
     text: `Dear ${vendorName},
 
-Your OTP for Milk Supply Vendor registration is:
+Your OTP for Milk Mitra vendor registration is:
 
 ${otp}
 
@@ -45,15 +45,15 @@ This OTP is valid for 5 minutes.
 Please do not share this OTP with anyone.
 
 Thank you,
-Milk Supply Vendor Management System`,
+Milk Mitra - A Milk Supply Management System`,
     html: `
       <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.6;">
         <p>Dear ${vendorName},</p>
-        <p>Your OTP for Milk Supply Vendor registration is:</p>
+        <p>Your OTP for Milk Mitra vendor registration is:</p>
         <p style="font-size: 28px; font-weight: 700; letter-spacing: 6px;">${otp}</p>
         <p>This OTP is valid for 5 minutes.</p>
         <p>Please do not share this OTP with anyone.</p>
-        <p>Thank you,<br/>Milk Supply Vendor Management System</p>
+        <p>Thank you,<br/>Milk Mitra - A Milk Supply Management System</p>
       </div>
     `,
   });
@@ -65,10 +65,10 @@ export async function sendPasswordResetEmail({ to, vendorName, resetLink }) {
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to,
-    subject: "Reset your Milk Vendor account password",
+    subject: "Reset your Milk Mitra account password",
     text: `Dear ${vendorName},
 
-We received a request to reset your Milk Supply Vendor account password.
+We received a request to reset your Milk Mitra vendor account password.
 
 Open this secure link to set a new password:
 ${resetLink}
@@ -76,18 +76,18 @@ ${resetLink}
 This link is valid for 30 minutes. If you did not request this, please ignore this email.
 
 Thank you,
-Milk Supply Vendor Management System`,
+Milk Mitra - A Milk Supply Management System`,
     html: `
       <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.6;">
         <p>Dear ${vendorName},</p>
-        <p>We received a request to reset your Milk Supply Vendor account password.</p>
+        <p>We received a request to reset your Milk Mitra vendor account password.</p>
         <p>
           <a href="${resetLink}" style="display: inline-block; background: #059669; color: #ffffff; padding: 10px 14px; border-radius: 8px; text-decoration: none; font-weight: 700;">
             Reset Password
           </a>
         </p>
         <p>This link is valid for 30 minutes. If you did not request this, please ignore this email.</p>
-        <p>Thank you,<br/>Milk Supply Vendor Management System</p>
+        <p>Thank you,<br/>Milk Mitra - A Milk Supply Management System</p>
       </div>
     `,
   });

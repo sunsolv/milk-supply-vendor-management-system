@@ -41,6 +41,6 @@ if (isProduction) {
 }
 
 app.listen(port, host, () => {
-  console.log(`Milk Supply Vendor Management System running at http://${host}:${port}/`);
+  console.log(`Milk Mitra - A Milk Supply Management System running at http://${host}:${port}/`);
   console.log(useLegacyBackend ? "Legacy backend enabled." : "Google Apps Script mode; MongoDB backend disabled.");
 });

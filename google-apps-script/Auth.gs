@@ -58,9 +58,9 @@ function sendRegistrationOtp_(payload, isResend) {
 
     MailApp.sendEmail({
       to: registration.email,
-      subject: "Your Milk Vendor Registration OTP",
-      body: "Dear " + registration.vendorName + ",\n\nYour OTP for Milk Supply Vendor registration is: " + otp + "\n\nThis OTP is valid for 5 minutes. Do not share it with anyone.\n\nThank you,\nMilk Supply Vendor Management System",
-      htmlBody: "<div style=\"font-family:Arial,sans-serif;line-height:1.6;color:#03045e\"><p>Dear " + escapeHtml_(registration.vendorName) + ",</p><p>Your OTP for Milk Supply Vendor registration is:</p><p style=\"font-size:28px;font-weight:700;letter-spacing:6px\">" + otp + "</p><p>This OTP is valid for 5 minutes. Do not share it with anyone.</p><p>Thank you,<br>Milk Supply Vendor Management System</p></div>"
+      subject: "Your Milk Mitra Registration OTP",
+      body: "Dear " + registration.vendorName + ",\n\nYour OTP for Milk Mitra vendor registration is: " + otp + "\n\nThis OTP is valid for 5 minutes. Do not share it with anyone.\n\nThank you,\nMilk Mitra - A Milk Supply Management System",
+      htmlBody: "<div style=\"font-family:Arial,sans-serif;line-height:1.6;color:#03045e\"><p>Dear " + escapeHtml_(registration.vendorName) + ",</p><p>Your OTP for Milk Mitra vendor registration is:</p><p style=\"font-size:28px;font-weight:700;letter-spacing:6px\">" + otp + "</p><p>This OTP is valid for 5 minutes. Do not share it with anyone.</p><p>Thank you,<br>Milk Mitra - A Milk Supply Management System</p></div>"
     });
     audit_(registration.email, "Public", isResend ? "OTP_RESENT" : "OTP_SENT", { purpose: "VendorRegistration" });
     return { message: isResend ? "OTP resent successfully" : "OTP sent to your email address", data: {} };
@@ -154,7 +154,7 @@ function forgotPassword_(payload) {
     var frontendUrl = PropertiesService.getScriptProperties().getProperty("FRONTEND_URL") || getSetting_("FRONTEND_URL");
     if (!frontendUrl) throw new Error("Password reset is not configured. Set FRONTEND_URL in Script Properties.");
     var resetLink = frontendUrl.replace(/\/$/, "") + "/vendor/reset-password?token=" + encodeURIComponent(token);
-    MailApp.sendEmail({ to: email, subject: "Reset your Milk Vendor account password", body: "Open this secure link to set a new password:\n" + resetLink + "\n\nThis link is valid for 30 minutes." });
+    MailApp.sendEmail({ to: email, subject: "Reset your Milk Mitra account password", body: "Open this secure link to set a new password:\n" + resetLink + "\n\nThis link is valid for 30 minutes." });
   }
   return { message: "If an account exists for this email, a password reset link has been sent.", data: {} };
 }

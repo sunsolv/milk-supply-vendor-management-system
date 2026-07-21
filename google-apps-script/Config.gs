@@ -1,5 +1,5 @@
 var APP = Object.freeze({
-  MASTER_TITLE: "Milk Supply Vendor Management - Master",
+  MASTER_TITLE: "Milk Mitra - A Milk Supply Management System - Master",
   DAILY_FOLDER_NAME: "MilkSupply_DailySupply_Data",
   DAILY_FILE_PREFIX: "DailySupply_",
   DAILY_SHEET: "DailySupply",
