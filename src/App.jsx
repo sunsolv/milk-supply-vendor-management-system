@@ -389,14 +389,16 @@ function openWhatsAppBill(reportData, paymentStatus, notify) {
 }
 
 function buildCustomerBillMessage(bill) {
+  const totalQuantity = bill.totalQuantitySupplied ?? bill.totalQuantity ?? 0;
+  const totalAmount = bill.totalAmountPayable ?? bill.totalAmount ?? 0;
   return `Dear ${bill.customerName || "Customer"},
 
 Your milk and dairy product supply details for ${bill.month} ${bill.year} are:
 
-Total Quantity Supplied: ${formatBillNumber(bill.totalQuantitySupplied)}
+Total Quantity Supplied: ${formatBillNumber(totalQuantity)}
 Days Supplied: ${bill.daysSupplied || 0}
 Days Not Supplied: ${bill.daysNotSupplied || 0}
-Total Amount Payable: ₹${formatBillNumber(bill.totalAmountPayable)}
+Total Amount Payable: ₹${formatBillNumber(totalAmount)}
 Payment Status: ${bill.paymentLine || "Please update payment details in Vendor Profile"}
 
 Thank you,
@@ -2833,9 +2835,12 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
     loadSetup();
   }, [loadSetup]);
 
-  const activeCustomers = customers.filter((customer) => customer.status === "Active");
-  const activeCustomerIds = new Set(activeCustomers.map((customer) => customer.id));
-  const selectedActiveCustomerIds = selectedCustomerIds.filter((id) => activeCustomerIds.has(id));
+  const activeCustomers = useMemo(() => customers.filter((customer) => customer.status === "Active"), [customers]);
+  const activeCustomerIds = useMemo(() => new Set(activeCustomers.map((customer) => customer.id)), [activeCustomers]);
+  const selectedActiveCustomerIds = useMemo(
+    () => selectedCustomerIds.filter((id) => activeCustomerIds.has(id)),
+    [selectedCustomerIds, activeCustomerIds],
+  );
   const allActiveCustomersSelected =
     activeCustomers.length > 0 && selectedActiveCustomerIds.length === activeCustomers.length;
   const paymentPhone = mobileDigits(profile?.phonePeGPayNumber || "");
@@ -3055,7 +3060,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
                       <p className="text-sm font-bold text-slate-950">{bill.customerName}</p>
                       <p className="mt-1 text-xs font-semibold text-slate-500">+91 {bill.customerPhone || "-"}</p>
                     </div>
-                    <p className="text-sm font-bold text-brandPrimary">₹{formatBillNumber(bill.totalAmountPayable)}</p>
+                    <p className="text-sm font-bold text-brandPrimary">₹{formatBillNumber(bill.totalAmountPayable ?? bill.totalAmount)}</p>
                   </div>
                   {customerPhoneInvalid ? (
                     <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
@@ -3215,7 +3220,6 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
   const dateRange = currentReportDateRange();
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [supplies, setSupplies] = useState([]);
   const [reports, setReports] = useState([]);
   const [reportData, setReportData] = useState(null);
   const [emptyReportMessage, setEmptyReportMessage] = useState("");
@@ -3248,10 +3252,9 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [customerResponse, productResponse, supplyResponse, reportResponse] = await Promise.all([
+      const [customerResponse, productResponse, reportResponse] = await Promise.all([
         apiRequest("/api/vendor/customers", { token }),
         apiRequest("/api/vendor/products", { token }),
-        apiRequest("/api/vendor/daily-supply", { token }),
         apiRequest("/api/vendor/reports", { token }),
       ]);
       const nextCustomers = customerResponse.customers || [];
@@ -3263,7 +3266,6 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
         current.length ? current.filter((id) => activeCustomerIds.includes(id)) : activeCustomerIds,
       );
       setProducts(productResponse.products || []);
-      setSupplies(supplyResponse.supplies || []);
       setReports(reportResponse.reports || []);
     } catch (error) {
       notify(error.message, "error");
@@ -3276,9 +3278,12 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
     load();
   }, [load]);
 
-  const activeCustomers = customers.filter((customer) => customer.status === "Active");
-  const activeCustomerIds = new Set(activeCustomers.map((customer) => customer.id));
-  const selectedActiveCustomerIds = selectedCustomerIds.filter((id) => activeCustomerIds.has(id));
+  const activeCustomers = useMemo(() => customers.filter((customer) => customer.status === "Active"), [customers]);
+  const activeCustomerIds = useMemo(() => new Set(activeCustomers.map((customer) => customer.id)), [activeCustomers]);
+  const selectedActiveCustomerIds = useMemo(
+    () => selectedCustomerIds.filter((id) => activeCustomerIds.has(id)),
+    [selectedCustomerIds, activeCustomerIds],
+  );
   const allActiveCustomersSelected =
     activeCustomers.length > 0 && selectedActiveCustomerIds.length === activeCustomers.length;
   const updateFromDateText = (value) => {
