@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  color: #18212f;
-  background: #f7faf8;
+  color: #03045e;
+  background: #caf0f8;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -18,7 +18,7 @@
 body {
   min-width: 320px;
   margin: 0;
-  background: #f8fafc;
+  background: #caf0f8;
   overflow-x: hidden;
   overflow-y: scroll;
 }

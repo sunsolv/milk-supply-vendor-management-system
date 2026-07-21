@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { apiRequest } from "./api.js";
 import {
   ArrowLeft,
   Download,
@@ -417,30 +418,6 @@ function openCustomerBillWhatsApp(bill, notify) {
   notify("WhatsApp bill message opened successfully.");
 }
 
-async function apiRequest(path, { method = "GET", body, token } = {}) {
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const response = await fetch(path, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const payload = await response.json().catch(() => ({
-    success: false,
-    message: "Unexpected server response.",
-  }));
-
-  if (!response.ok || payload.success === false) {
-    const error = new Error(payload.message || "Request failed.");
-    error.status = response.status;
-    error.payload = payload;
-    throw error;
-  }
-
-  return payload;
-}
-
 function useStoredToken(storageKey = AUTH_TOKEN_KEY) {
   const [token, setTokenState] = useState(() => localStorage.getItem(storageKey) || "");
 
@@ -483,7 +460,7 @@ function Button({
   ...props
 }) {
   const variants = {
-    primary: "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500",
+    primary: "bg-brandPrimary text-white hover:bg-brandPrimary focus:ring-brandAccent",
     secondary:
       "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-400",
     subtle: "bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400",
@@ -520,7 +497,7 @@ function Input({ className, ...props }) {
   return (
     <input
       className={classNames(
-        "min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100",
+        "min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brandAccent focus:ring-2 focus:ring-brandLight",
         className,
       )}
       {...props}
@@ -532,7 +509,7 @@ function TextArea({ className, ...props }) {
   return (
     <textarea
       className={classNames(
-        "min-h-24 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100",
+        "min-h-24 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brandAccent focus:ring-2 focus:ring-brandLight",
         className,
       )}
       {...props}
@@ -544,7 +521,7 @@ function Select({ className, children, ...props }) {
   return (
     <select
       className={classNames(
-        "min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100",
+        "min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-brandAccent focus:ring-2 focus:ring-brandLight",
         className,
       )}
       {...props}
@@ -556,7 +533,7 @@ function Select({ className, children, ...props }) {
 
 function MobileInput({ value, onChange, required = true }) {
   return (
-    <div className="flex min-h-11 overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100">
+    <div className="flex min-h-11 overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-brandAccent focus-within:ring-2 focus-within:ring-brandLight">
       <span className="flex items-center border-r border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-700">
         +91
       </span>
@@ -578,7 +555,7 @@ function ShowPasswordControl({ checked, onChange }) {
     <label className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
       <input
         type="checkbox"
-        className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+        className="h-4 w-4 rounded border-slate-300 text-brandPrimary focus:ring-brandAccent"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
       />
@@ -602,13 +579,13 @@ function PasswordRequirements({ password, confirmPassword }) {
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
       <div className="grid gap-2 text-xs font-semibold">
         {items.map(([label, valid]) => (
-          <p key={label} className={valid ? "text-emerald-700" : "text-slate-500"}>
+          <p key={label} className={valid ? "text-brandPrimary" : "text-slate-500"}>
             {valid ? "Pass:" : "Need:"} {label}
           </p>
         ))}
       </div>
       {showMatchMessage ? (
-        <p className={classNames("mt-2 text-xs font-bold", matched ? "text-emerald-700" : "text-red-700")}>
+        <p className={classNames("mt-2 text-xs font-bold", matched ? "text-brandPrimary" : "text-red-700")}>
           {matched ? "Password matched." : "Password and Confirm Password do not match."}
         </p>
       ) : null}
@@ -624,13 +601,13 @@ function ToastStack({ toasts, dismissToast }) {
           key={toast.id}
           className={classNames(
             "flex items-start gap-3 rounded-lg border bg-white p-3 shadow-lg",
-            toast.type === "error" ? "border-red-200" : "border-emerald-200",
+            toast.type === "error" ? "border-red-200" : "border-brandLight",
           )}
         >
           <div
             className={classNames(
               "rounded-lg p-2",
-              toast.type === "error" ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700",
+              toast.type === "error" ? "bg-red-50 text-red-700" : "bg-brandBg text-brandPrimary",
             )}
           >
             {toast.type === "error" ? <X className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
@@ -652,19 +629,19 @@ function ToastStack({ toasts, dismissToast }) {
 
 function Shell({ children }) {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-brandBg/40 text-brandDark">
+      <header className="border-b border-brandAccent bg-brandDark text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-emerald-600 p-2 text-white">
+            <div className="rounded-lg bg-brandPrimary p-2 text-white">
               <Milk className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-950">Milk Supply</p>
-              <p className="text-xs font-medium text-slate-500">Vendor Management System</p>
+              <p className="text-sm font-bold text-white">Milk Supply</p>
+              <p className="text-xs font-medium text-brandLight">Vendor Management System</p>
             </div>
           </div>
-          <div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-wide text-emerald-700 sm:flex">
+          <div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-wide text-brandPrimary sm:flex">
             <ShieldCheck className="h-4 w-4" />
             Phase 1
           </div>
@@ -679,7 +656,7 @@ function AuthPanel({ title, subtitle, icon: Icon, children }) {
   return (
     <section className="mx-auto max-w-xl rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="mb-6 flex items-start gap-3">
-        <div className="rounded-lg bg-emerald-50 p-3 text-emerald-700 ring-1 ring-emerald-100">
+        <div className="rounded-lg bg-brandBg p-3 text-brandPrimary ring-1 ring-brandLight">
           <Icon className="h-6 w-6" />
         </div>
         <div>
@@ -722,7 +699,7 @@ function LandingPage({ onRegister, onLogin }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
       <section>
-        <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">
+        <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">
           Phase 1 application
         </p>
         <h1 className="mt-3 text-4xl font-bold text-slate-950 sm:text-5xl">
@@ -897,11 +874,11 @@ function RegistrationPage({ onBack, onRegistered, notify }) {
         subtitle="OTP has been sent to your email address. Please check your inbox."
         icon={Mail}
       >
-        <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+        <div className="mb-5 rounded-lg border border-brandLight bg-brandBg p-4">
           <p className="text-sm font-bold text-slate-950">Email address</p>
-          <p className="mt-1 break-words text-sm font-semibold text-emerald-800">{otpEmail}</p>
+          <p className="mt-1 break-words text-sm font-semibold text-brandPrimary">{otpEmail}</p>
           <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Clock3 className="h-4 w-4 text-emerald-700" />
+            <Clock3 className="h-4 w-4 text-brandPrimary" />
             OTP expires in {formatTimer(otpTimer)}
           </div>
         </div>
@@ -1078,7 +1055,7 @@ function LoginPage({ onBack, onLogin, onPendingApproval, onForgotPassword, prefi
           <ShowPasswordControl checked={showPassword} onChange={setShowPassword} />
           <button
             type="button"
-            className="text-left text-sm font-bold text-emerald-700 hover:text-emerald-800"
+            className="text-left text-sm font-bold text-brandPrimary hover:text-brandPrimary"
             onClick={onForgotPassword}
           >
             Forgot Password?
@@ -1142,7 +1119,7 @@ function ForgotPasswordPage({ onBack, notify }) {
           />
         </Field>
         {sent ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
+          <div className="rounded-lg border border-brandLight bg-brandBg p-3 text-sm font-semibold text-brandPrimary">
             Password reset link has been sent to your email.
           </div>
         ) : null}
@@ -1253,7 +1230,7 @@ function MetricCard({ label, value, icon: Icon }) {
           <p className="text-sm font-medium text-slate-500">{label}</p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{value}</p>
         </div>
-        <div className="rounded-lg bg-emerald-50 p-2 text-emerald-700 ring-1 ring-emerald-100">
+        <div className="rounded-lg bg-brandBg p-2 text-brandPrimary ring-1 ring-brandLight">
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -1292,7 +1269,7 @@ function DashboardPage({ vendor, dashboard, onLogout, onNavigate }) {
     <div className="space-y-6">
       <section className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Vendor Dashboard</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Vendor Dashboard</p>
           <h1 className="mt-1 text-2xl font-bold text-slate-950">{vendor?.shopName}</h1>
           <p className="mt-1 text-sm text-slate-600">
             {vendor?.vendorName} · {vendor?.email} · +91 {vendor?.mobileNumber}
@@ -1394,7 +1371,7 @@ function DashboardPage({ vendor, dashboard, onLogout, onNavigate }) {
 function ApprovalPendingPage({ email, onLogin }) {
   return (
     <section className="mx-auto max-w-2xl rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-brandBg text-brandPrimary">
         <Clock3 className="h-6 w-6" />
       </div>
       <h1 className="mt-4 text-2xl font-bold text-slate-950">Approval pending</h1>
@@ -1693,7 +1670,7 @@ function VendorCustomersPage({ token, vendor, path, onNavigate, onRefresh, notif
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Customer Management</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Customer Management</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-950">Customers</h1>
             <p className="mt-2 text-sm font-semibold text-slate-700">
               You have used {used} out of {customerLimit} customer slots.
@@ -1959,7 +1936,7 @@ function VendorProductsPage({ token, vendor, path, onNavigate, onRefresh, notify
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Product Management</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Product Management</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-950">Products</h1>
             <p className="mt-2 text-sm font-semibold text-slate-700">
               You have used {used} out of {productLimit} product slots.
@@ -2231,7 +2208,7 @@ function VendorProfilePage({ token, vendor, onNavigate, onRefresh, notify }) {
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Vendor Profile</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Vendor Profile</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-950">{profile?.shopName || vendor?.shopName}</h1>
             <p className="mt-1 text-sm text-slate-600">{profile?.vendorName || vendor?.vendorName} · {profile?.email || vendor?.email} · +91 {profile?.mobileNumber || vendor?.mobileNumber}</p>
           </div>
@@ -2545,7 +2522,7 @@ function VendorDailySupplyPage({ token, onNavigate, notify }) {
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Daily Supply Update</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Daily Supply Update</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-950">Daily Supply Entry</h1>
           </div>
           <Button variant="secondary" icon={ArrowLeft} onClick={() => onNavigate("/vendor/dashboard")}>
@@ -2582,7 +2559,7 @@ function VendorDailySupplyPage({ token, onNavigate, notify }) {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-bold text-slate-950">Customer Selection List</p>
-                <p className="mt-1 text-sm font-semibold text-emerald-700">
+                <p className="mt-1 text-sm font-semibold text-brandPrimary">
                   Selected Customers: {selectedCustomerCount}
                 </p>
               </div>
@@ -2590,7 +2567,7 @@ function VendorDailySupplyPage({ token, onNavigate, notify }) {
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+                    className="h-4 w-4 rounded border-slate-300 text-brandPrimary"
                     checked={allActiveCustomersSelected}
                     onChange={(event) =>
                       setSelectedCustomerIds(event.target.checked ? activeCustomers.map((customer) => customer.id) : [])
@@ -2624,7 +2601,7 @@ function VendorDailySupplyPage({ token, onNavigate, notify }) {
                         >
                           <input
                             type="checkbox"
-                            className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600"
+                            className="mt-1 h-4 w-4 rounded border-slate-300 text-brandPrimary"
                             checked={selectedActiveCustomerIds.includes(customer.id)}
                             onChange={(event) =>
                               setSelectedCustomerIds((current) => {
@@ -2682,10 +2659,10 @@ function VendorDailySupplyPage({ token, onNavigate, notify }) {
                 {selectedProduct ? `${formatCurrency(selectedProduct.pricePerUnit)} / ${selectedProduct.unit}` : "-"}
               </p>
             </div>
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Amount</p>
-              <p className="mt-1 text-sm font-semibold text-emerald-950">{formatCurrency(amountPreview)}</p>
-              {!editing ? <p className="mt-1 text-xs font-semibold text-emerald-800">Per selected customer</p> : null}
+            <div className="rounded-lg border border-brandLight bg-brandBg p-4">
+              <p className="text-xs font-bold uppercase tracking-wide text-brandPrimary">Amount</p>
+              <p className="mt-1 text-sm font-semibold text-brandDark">{formatCurrency(amountPreview)}</p>
+              {!editing ? <p className="mt-1 text-xs font-semibold text-brandPrimary">Per selected customer</p> : null}
             </div>
           </div>
           <Field label="Supply Status">
@@ -2918,7 +2895,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Customer Billing</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Customer Billing</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-950">Send Customer Bills</h1>
           </div>
           <Button variant="secondary" icon={ArrowLeft} onClick={() => onNavigate("/vendor/dashboard")}>
@@ -2939,9 +2916,9 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
       ) : null}
 
       {!paymentDetailsMissing ? (
-        <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-bold text-emerald-950">Payment Details</p>
-          <div className="mt-2 grid gap-2 text-sm font-semibold text-emerald-800 sm:grid-cols-2">
+        <section className="rounded-lg border border-brandLight bg-brandBg p-4">
+          <p className="text-sm font-bold text-brandDark">Payment Details</p>
+          <div className="mt-2 grid gap-2 text-sm font-semibold text-brandPrimary sm:grid-cols-2">
             {validPaymentPhone ? <p>PhonePe / GPay: +91 {validPaymentPhone}</p> : null}
             {paymentUpiId ? <p>UPI ID: {paymentUpiId}</p> : null}
           </div>
@@ -2987,7 +2964,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold text-slate-950">Select Customer / Customers</p>
-                <p className="mt-1 text-sm font-semibold text-emerald-700">
+                <p className="mt-1 text-sm font-semibold text-brandPrimary">
                   Selected Customers: {selectedActiveCustomerIds.length}
                 </p>
               </div>
@@ -2995,7 +2972,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+                    className="h-4 w-4 rounded border-slate-300 text-brandPrimary"
                     checked={allActiveCustomersSelected}
                     onChange={(event) => {
                       setSelectedCustomerIds(event.target.checked ? activeCustomers.map((customer) => customer.id) : []);
@@ -3018,7 +2995,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
                   >
                     <input
                       type="checkbox"
-                      className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600"
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-brandPrimary"
                       checked={selectedActiveCustomerIds.includes(customer.id)}
                       onChange={(event) => {
                         setSelectedCustomerIds((current) =>
@@ -3053,7 +3030,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-bold text-slate-950">WhatsApp Message Preview</h2>
           {generated && bills.length ? (
-            <p className="text-sm font-semibold text-emerald-700">{bills.length} bill preview{bills.length === 1 ? "" : "s"}</p>
+            <p className="text-sm font-semibold text-brandPrimary">{bills.length} bill preview{bills.length === 1 ? "" : "s"}</p>
           ) : null}
         </div>
 
@@ -3076,7 +3053,7 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
                       <p className="text-sm font-bold text-slate-950">{bill.customerName}</p>
                       <p className="mt-1 text-xs font-semibold text-slate-500">+91 {bill.customerPhone || "-"}</p>
                     </div>
-                    <p className="text-sm font-bold text-emerald-700">₹{formatBillNumber(bill.totalAmountPayable)}</p>
+                    <p className="text-sm font-bold text-brandPrimary">₹{formatBillNumber(bill.totalAmountPayable)}</p>
                   </div>
                   {customerPhoneInvalid ? (
                     <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
@@ -3110,7 +3087,7 @@ function ReportPreview({ reportData }) {
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Report Preview</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Report Preview</p>
           <h2 className="mt-1 text-xl font-bold text-slate-950">{reportTitle(reportData)}</h2>
           <p className="mt-1 text-sm text-slate-600">
             {reportData.vendor?.shopName} · Total amount {formatCurrency(reportData.totalAmount || 0)}
@@ -3128,10 +3105,10 @@ function ReportPreview({ reportData }) {
         </div>
       </div>
       {reportData.reportType === "Individual" && reportData.customer ? (
-        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-bold text-emerald-950">{reportData.customer.name}</p>
-          <p className="mt-1 text-sm text-emerald-800">+91 {reportData.customer.phoneNumber} · {reportData.customer.address}</p>
-          <p className="mt-1 text-sm text-emerald-800">
+        <div className="mt-4 rounded-lg border border-brandLight bg-brandBg p-4">
+          <p className="text-sm font-bold text-brandDark">{reportData.customer.name}</p>
+          <p className="mt-1 text-sm text-brandPrimary">+91 {reportData.customer.phoneNumber} · {reportData.customer.address}</p>
+          <p className="mt-1 text-sm text-brandPrimary">
             Payment options: {reportData.vendor?.phonePeGPayNumber ? `+91 ${reportData.vendor.phonePeGPayNumber}` : "-"} · {reportData.vendor?.upiId || "-"}
           </p>
         </div>
@@ -3417,7 +3394,7 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Reports and Billing</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Reports and Billing</p>
             <h1 className="mt-1 text-2xl font-bold text-slate-950">Monthly Reports</h1>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -3501,7 +3478,7 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold text-slate-950">Customer Selection</p>
-                <p className="mt-1 text-sm font-semibold text-emerald-700">
+                <p className="mt-1 text-sm font-semibold text-brandPrimary">
                   Selected Customers: {selectedActiveCustomerIds.length}
                 </p>
               </div>
@@ -3509,7 +3486,7 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+                    className="h-4 w-4 rounded border-slate-300 text-brandPrimary"
                     checked={allActiveCustomersSelected}
                     onChange={(event) =>
                       setSelectedCustomerIds(event.target.checked ? activeCustomers.map((customer) => customer.id) : [])
@@ -3530,7 +3507,7 @@ function VendorReportsPage({ token, path, onNavigate, notify }) {
                   >
                     <input
                       type="checkbox"
-                      className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600"
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-brandPrimary"
                       checked={selectedActiveCustomerIds.includes(customer.id)}
                       onChange={(event) =>
                         setSelectedCustomerIds((current) =>
@@ -3854,7 +3831,7 @@ function AdminRecordsPage({ type, token, routePath, notify, onRefresh }) {
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Super Admin</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Super Admin</p>
           <h2 className="mt-1 text-xl font-bold text-slate-950">{isCustomers ? "Customer Records" : "Product Records"}</h2>
           <p className="mt-1 text-sm text-slate-500">
             View and manage {isCustomers ? "customers" : "products"} created across all vendors.
@@ -3915,11 +3892,11 @@ function AdminRecordsPage({ type, token, routePath, notify, onRefresh }) {
       ) : null}
 
       {viewRecord ? (
-        <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+        <div className="mt-5 rounded-lg border border-brandLight bg-brandBg p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h3 className="text-base font-bold text-emerald-950">{viewRecord.name}</h3>
-              <p className="mt-1 text-sm text-emerald-800">
+              <h3 className="text-base font-bold text-brandDark">{viewRecord.name}</h3>
+              <p className="mt-1 text-sm text-brandPrimary">
                 {viewRecord.vendorShopName || "-"} · {viewRecord.vendorName || "-"}
               </p>
             </div>
@@ -3945,8 +3922,8 @@ function AdminRecordsPage({ type, token, routePath, notify, onRefresh }) {
                   ["Status", viewRecord.status],
                 ]
             ).map(([label, value]) => (
-              <div key={label} className="rounded-lg border border-emerald-200 bg-white/70 p-3">
-                <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">{label}</p>
+              <div key={label} className="rounded-lg border border-brandLight bg-white/70 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-brandPrimary">{label}</p>
                 <p className="mt-1 text-sm font-semibold text-slate-950">{value}</p>
               </div>
             ))}
@@ -4076,7 +4053,7 @@ function AdminReportsPage({ token, notify }) {
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Super Admin</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">Super Admin</p>
           <h2 className="mt-1 text-xl font-bold text-slate-950">Saved Reports</h2>
           <p className="mt-1 text-sm text-slate-500">View reports generated by vendors across the system.</p>
         </div>
@@ -4236,7 +4213,7 @@ function SuperAdminLoginPage({ onLogin, notify }) {
 function statusBadgeClass(status) {
   const classes = {
     "Pending Approval": "bg-orange-50 text-orange-700 ring-orange-100",
-    Active: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    Active: "bg-brandBg text-brandPrimary ring-brandLight",
     Inactive: "bg-slate-100 text-slate-700 ring-slate-200",
     Rejected: "bg-red-50 text-red-700 ring-red-100",
   };
@@ -4536,7 +4513,7 @@ function SuperAdminDashboard({
     <div className="space-y-6">
       <section className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">
+          <p className="text-sm font-bold uppercase tracking-wide text-brandPrimary">
             Super Admin
           </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-950">
@@ -4820,6 +4797,7 @@ function SuperAdminApp({ path, navigate }) {
   };
 
   const logout = () => {
+    apiRequest("/api/super-admin/logout", { method: "POST", token }).catch(() => {});
     setToken("");
     setAdmin(null);
     setDashboard(null);
@@ -4833,7 +4811,7 @@ function SuperAdminApp({ path, navigate }) {
   if (booting) {
     page = (
       <section className="mx-auto max-w-xl rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-brandPrimary border-t-transparent" />
         <p className="mt-4 text-sm font-semibold text-slate-600">Loading admin session...</p>
       </section>
     );
@@ -4997,6 +4975,7 @@ function VendorApp({ path, navigate }) {
   };
 
   const logout = ({ redirectTo = "/", message = "Logout successful." } = {}) => {
+    apiRequest("/api/vendor/logout", { method: "POST", token }).catch(() => {});
     setToken("");
     setVendor(null);
     setDashboard(null);
@@ -5027,7 +5006,7 @@ function VendorApp({ path, navigate }) {
     if (booting) {
       return (
         <section className="mx-auto max-w-xl rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-brandPrimary border-t-transparent" />
           <p className="mt-4 text-sm font-semibold text-slate-600">Loading secure session...</p>
         </section>
       );
