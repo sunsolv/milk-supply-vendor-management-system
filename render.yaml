@@ -14,23 +14,7 @@ services:
         value: production
       - key: NODE_VERSION
         value: "22"
-      - key: MONGODB_URI
-        sync: false
-      - key: JWT_SECRET
-        generateValue: true
-      - key: SUPER_ADMIN_NAME
-        sync: false
-      - key: SUPER_ADMIN_EMAIL
-        sync: false
-      - key: SUPER_ADMIN_PASSWORD
-        sync: false
-      - key: SMTP_HOST
-        sync: false
-      - key: SMTP_PORT
-        sync: false
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
+      - key: USE_LEGACY_BACKEND
+        value: "false"
+      - key: VITE_APPS_SCRIPT_API_URL
+        value: https://script.google.com/macros/s/AKfycbyVbHS1fUWrNNr-vZsYOwAlGoBgvnC4UF5hildHMOFaiFlXNnI-iyw-_F1VOm91yYa5/exec

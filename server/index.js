@@ -2,8 +2,6 @@ import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { connectDatabase } from "./database.js";
-import apiRoutes from "./routes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
@@ -11,10 +9,19 @@ const app = express();
 const port = Number(process.env.PORT || 5173);
 const isProduction = process.env.NODE_ENV === "production";
 const host = process.env.HOST || (isProduction ? "0.0.0.0" : "127.0.0.1");
+const useLegacyBackend = process.env.USE_LEGACY_BACKEND === "true";
 
 app.disable("x-powered-by");
-app.use(express.json({ limit: "1mb" }));
-app.use("/api", apiRoutes);
+
+if (useLegacyBackend) {
+  const [{ connectDatabase }, { default: apiRoutes }] = await Promise.all([
+    import("./database.js"),
+    import("./routes.js"),
+  ]);
+  await connectDatabase();
+  app.use(express.json({ limit: "1mb" }));
+  app.use("/api", apiRoutes);
+}
 
 if (isProduction) {
   const distDir = path.join(rootDir, "dist");
@@ -33,12 +40,7 @@ if (isProduction) {
   app.use(vite.middlewares);
 }
 
-try {
-  await connectDatabase();
-  app.listen(port, host, () => {
-    console.log(`Milk Supply Vendor Management System running at http://${host}:${port}/`);
-  });
-} catch (error) {
-  console.error("Server failed to start:", error);
-  process.exit(1);
-}
+app.listen(port, host, () => {
+  console.log(`Milk Supply Vendor Management System running at http://${host}:${port}/`);
+  console.log(useLegacyBackend ? "Legacy backend enabled." : "Google Apps Script mode; MongoDB backend disabled.");
+});
