@@ -2870,9 +2870,11 @@ function VendorSendCustomerBillsPage({ token, vendor, onNavigate, notify }) {
       const params = new URLSearchParams({
         month: String(Number(filters.month)),
         year: String(Number(filters.year)),
-        customerIds: selectedActiveCustomerIds.join(","),
       });
-      const response = await apiRequest(`/api/vendor/customer-bills?${params.toString()}`, { token });
+      const response = await apiRequest(`/api/vendor/customer-bills?${params.toString()}`, {
+        token,
+        body: { customerIds: selectedActiveCustomerIds },
+      });
       const previewBills = response.data || [];
       setBills(response.hasSupplyRecords ? previewBills : []);
       setGenerated(true);
